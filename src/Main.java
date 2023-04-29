@@ -22,7 +22,7 @@ public class Main {
                         TaskService.addTask(scanner);
                         break;
                     case 2:
-                        TaskService.addTask(scanner);
+                        TaskService.editTask(scanner);
                         break;
                     case 3:
                         TaskService.addTask(scanner);

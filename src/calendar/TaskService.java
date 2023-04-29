@@ -1,5 +1,6 @@
 package calendar;
 
+import calendar.exceptions.TaskNotFoundException;
 import calendar.exceptions.WrongInputException;
 import calendar.repeatabilityOfTask.*;
 
@@ -67,25 +68,88 @@ public class TaskService {
             case 0:
                 OneTimeTask oneTimeTask = new OneTimeTask(title, description, taskType, localDateTime);
                 actualTask.put(OneTimeTask.getId(), oneTimeTask);
-//                return oneTimeTask;
+                break;
             case 1:
                 DailyTask dailyTask = new DailyTask(title, description, taskType, localDateTime);
                 actualTask.put(DailyTask.getId(), dailyTask);
-                return dailyTask;
+                break;
             case 2:
                 WeeklyTask weeklyTask = new WeeklyTask(title, description, taskType, localDateTime);
                 actualTask.put(WeeklyTask.getId(), weeklyTask);
-                return weeklyTask;
+                break;
             case 3:
                 MonthlyTask monthlyTask = new MonthlyTask(title, description, taskType, localDateTime);
                 actualTask.put(MonthlyTask.getId(), monthlyTask);
-                return monthlyTask;
+                break;
             case 4:
                 YearlyTask yearlyTask = new YearlyTask(title, description, taskType, localDateTime);
                 actualTask.put(YearlyTask.getId(), yearlyTask);
-                return yearlyTask;
+                break;
             }
             return null;
         }
+
+    public static void editTask(Scanner scanner) {
+        try {
+            System.out.println("Редактирование задачи: введите id Задачи");
+            printActualTask();
+            int id = scanner.nextInt();
+            if (!actualTask.containsKey(id)) {
+                throw new TaskNotFoundException("Задача не найдена");
+            }
+            System.out.println("Редактировать задачу: 0 - название, 1 - описание");
+            int menuCase = scanner.nextInt();
+            switch (menuCase) {
+                case 0:
+                    scanner.nextLine();
+                    System.out.println("Введите название задачи:");
+                    String title = scanner.nextLine();
+                    Task taskTitle = (Task) actualTask.get(id);
+                    taskTitle.setTitle(title);
+                    break;
+                case 1:
+                    scanner.nextLine();
+                    System.out.println("Введите описание задачи:");
+                    String description = scanner.nextLine();
+                    Task taskDescription = (Task) actualTask.get(id);
+                    taskDescription.setTitle(description);
+                    break;
+            }
+        } catch (TaskNotFoundException e) {
+            System.err.println(e.getMessage());
+        }
     }
-}
+
+    public static void deleteTask(Scanner scanner) {
+        System.out.println("Актуальные задачи:");
+        printActualTask();
+        try {
+            System.out.println("Для удаления введите id задачи");
+            int id = scanner.nextInt();
+            if (actualTask.containsKey(id)) {
+                Repeatable removedTask = actualTask.get(id);
+                removedTask.setArchived(true);
+                archivedTask.put(id, removedTask);
+                System.out.println("Задача " + id + " была удалена");
+            } else {
+                throw new TaskNotFoundException("Задача не была найдена");
+            }
+        } catch (TaskNotFoundException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public static void printActualTask() {
+        for (Repeatable task : actualTask.values()) {
+            System.out.println(task);
+        }
+    }
+
+    public static void printArchivedTask() {
+        for (Repeatable task : archivedTask.values()) {
+            System.out.println(task);
+        }
+    }
+
+
+    }
