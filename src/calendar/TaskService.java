@@ -5,12 +5,11 @@ import calendar.exceptions.WrongInputException;
 import calendar.repeatabilityOfTask.*;
 
 import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class TaskService {
 
@@ -49,7 +48,7 @@ public class TaskService {
             Repeatable task = null;
             try {
                 task = createTask(occurrence, title, description, taskType, eventDate);
-                System.out.println("Создана задача: " + task);
+                System.out.println("Создана задача: " + title);
             } catch (WrongInputException e) {
                 System.out.println(e.getMessage());
             }
@@ -67,23 +66,23 @@ public class TaskService {
         switch (occurence) {
             case 0:
                 OneTimeTask oneTimeTask = new OneTimeTask(title, description, taskType, localDateTime);
-                actualTask.put(OneTimeTask.getId(), oneTimeTask);
+                actualTask.put(oneTimeTask.getId(), oneTimeTask);
                 break;
             case 1:
                 DailyTask dailyTask = new DailyTask(title, description, taskType, localDateTime);
-                actualTask.put(DailyTask.getId(), dailyTask);
+                actualTask.put(dailyTask.getId(), dailyTask);
                 break;
             case 2:
                 WeeklyTask weeklyTask = new WeeklyTask(title, description, taskType, localDateTime);
-                actualTask.put(WeeklyTask.getId(), weeklyTask);
+                actualTask.put(weeklyTask.getId(), weeklyTask);
                 break;
             case 3:
                 MonthlyTask monthlyTask = new MonthlyTask(title, description, taskType, localDateTime);
-                actualTask.put(MonthlyTask.getId(), monthlyTask);
+                actualTask.put(monthlyTask.getId(), monthlyTask);
                 break;
             case 4:
                 YearlyTask yearlyTask = new YearlyTask(title, description, taskType, localDateTime);
-                actualTask.put(YearlyTask.getId(), yearlyTask);
+                actualTask.put(yearlyTask.getId(), yearlyTask);
                 break;
             }
             return null;
@@ -138,6 +137,52 @@ public class TaskService {
             System.err.println(e.getMessage());
         }
     }
+
+    public static void getTasksByDay(Scanner scanner) {
+        System.out.println("Введите дату в формате dd.MM.yyyy");
+        try {
+            String date = scanner.next();
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            LocalDate requestedDate = LocalDate.parse(date, dateFormatter);
+            List<Repeatable> foundEvents = findTasksByDay(requestedDate);
+            System.out.println("События на " + requestedDate + " :");
+            for (Repeatable task : foundEvents) {
+                System.out.println(task);
+            }
+        } catch (DateTimeParseException e) {
+            System.err.println("Проверьте формат даты dd.MM.yyyy и попробуйте еще раз");
+        }
+        scanner.nextLine();
+        System.out.println("Для выхода нажмите Enter\n");
+    }
+
+    private static List<Repeatable> findTasksByDay(LocalDate date) {
+        List<Repeatable> tasks = new ArrayList<>();
+        for (Repeatable task : actualTask.values()) {
+            if (task.checkOccurrence(date.atStartOfDay())) {
+                tasks.add(task);
+            }
+        }
+        return tasks;
+    }
+
+    public static void getGrouppedByDate() {
+        Map<LocalDate, ArrayList<Repeatable>> taskMap = new HashMap<>();
+        for (Map.Entry<Integer, Repeatable> entry : actualTask.entrySet()) {
+            Repeatable task = entry.getValue();
+            LocalDate localDate = task.getFirstDate().toLocalDate();
+            if (taskMap.containsKey(localDate)) {
+                ArrayList<Repeatable> tasks = taskMap.get(localDate);
+                tasks.add(task);
+            } else {
+                taskMap.put(localDate, new ArrayList<>(Collections.singletonList(task)));
+            }
+            for (Map.Entry<LocalDate, ArrayList<Repeatable>> taskEntry : taskMap.entrySet()) {
+                System.out.println(taskEntry.getKey() + " : " + taskEntry.getValue());
+            }
+        }
+    }
+
 
     public static void printActualTask() {
         for (Repeatable task : actualTask.values()) {

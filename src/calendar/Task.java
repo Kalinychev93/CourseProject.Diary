@@ -63,12 +63,9 @@ public class Task {
         this.archived = archived;
     }
 
-    public static Integer getId() {
-        return id;
-    }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public Integer getId() {
+        return id;
     }
 
     @Override
@@ -78,7 +75,6 @@ public class Task {
                 ", описание задачи: " + description + '\'' +
                 ", тип задачи: " + taskType +
                 ", дата: " + firstDate +
-                ", статус - " + archived +
                 ", id = " + id;
     }
 
