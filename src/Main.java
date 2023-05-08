@@ -13,8 +13,8 @@ public class Main {
                         + "2. Редактировать задачу" + "\n"
                         + "3. Удалить задачу" + "\n"
                         + "4. Получить задачи на указанный день" + "\n"
-                        + "5. Получить архивные задачи" + "\n"
-                        + "6. Получить сгруппированные по датам задачи" + "\n"
+                        + "5. Получить все актуальные задачи" + "\n"
+                        + "6. Получить все архивные (выполненные) задачи" + "\n"
                         + "0. Выход");
                 if (scanner.hasNextInt()) {
                     int menu = scanner.nextInt();
@@ -32,10 +32,9 @@ public class Main {
                             TaskService.getTasksByDay(scanner);
                             break;
                         case 5:
-                            TaskService.printArchivedTask();
-                            break;
+                            TaskService.printActualTasks();
                         case 6:
-                            TaskService.getGrouppedByDate();
+                            TaskService.printArchivedTasks();
                             break;
                         case 0:
                             break label;

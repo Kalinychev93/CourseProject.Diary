@@ -74,7 +74,8 @@ public class Task {
                 "Наименование задачи - " + title + '\'' +
                 ", описание задачи: " + description + '\'' +
                 ", тип задачи: " + taskType +
-                ", дата: " + firstDate +
+                ", дата создания: " + firstDate +
+                ", задача в архиве (выполнена): " + isArchived() +
                 ", id = " + id;
     }
 

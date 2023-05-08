@@ -5,6 +5,7 @@ import calendar.Task;
 import calendar.TaskType;
 import calendar.exceptions.WrongInputException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class WeeklyTask extends Task implements Repeatable {

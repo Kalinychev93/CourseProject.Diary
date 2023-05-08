@@ -13,8 +13,8 @@ import java.util.*;
 
 public class TaskService {
 
-    private static final Map<Integer, Repeatable> actualTask = new HashMap<>();
-    private static final Map<Integer, Repeatable> archivedTask = new HashMap<>();
+    private static final Map<Integer, Repeatable> actualTasks = new HashMap<>();
+    private static final Map<Integer, Repeatable> archivedTasks = new HashMap<>();
 
     public static void addTask(Scanner scanner) {
         try {
@@ -66,23 +66,23 @@ public class TaskService {
         switch (occurence) {
             case 0:
                 OneTimeTask oneTimeTask = new OneTimeTask(title, description, taskType, localDateTime);
-                actualTask.put(oneTimeTask.getId(), oneTimeTask);
+                actualTasks.put(oneTimeTask.getId(), oneTimeTask);
                 break;
             case 1:
                 DailyTask dailyTask = new DailyTask(title, description, taskType, localDateTime);
-                actualTask.put(dailyTask.getId(), dailyTask);
+                actualTasks.put(dailyTask.getId(), dailyTask);
                 break;
             case 2:
                 WeeklyTask weeklyTask = new WeeklyTask(title, description, taskType, localDateTime);
-                actualTask.put(weeklyTask.getId(), weeklyTask);
+                actualTasks.put(weeklyTask.getId(), weeklyTask);
                 break;
             case 3:
                 MonthlyTask monthlyTask = new MonthlyTask(title, description, taskType, localDateTime);
-                actualTask.put(monthlyTask.getId(), monthlyTask);
+                actualTasks.put(monthlyTask.getId(), monthlyTask);
                 break;
             case 4:
                 YearlyTask yearlyTask = new YearlyTask(title, description, taskType, localDateTime);
-                actualTask.put(yearlyTask.getId(), yearlyTask);
+                actualTasks.put(yearlyTask.getId(), yearlyTask);
                 break;
             }
             return null;
@@ -91,9 +91,9 @@ public class TaskService {
     public static void editTask(Scanner scanner) {
         try {
             System.out.println("Редактирование задачи: введите id Задачи");
-            printActualTask();
+            printActualTasks();
             int id = scanner.nextInt();
-            if (!actualTask.containsKey(id)) {
+            if (!actualTasks.containsKey(id)) {
                 throw new TaskNotFoundException("Задача не найдена");
             }
             System.out.println("Редактировать задачу: 0 - название, 1 - описание");
@@ -103,15 +103,17 @@ public class TaskService {
                     scanner.nextLine();
                     System.out.println("Введите название задачи:");
                     String title = scanner.nextLine();
-                    Task taskTitle = (Task) actualTask.get(id);
+                    Task taskTitle = (Task) actualTasks.get(id);
                     taskTitle.setTitle(title);
+                    System.out.println("Задача отредактирована.");
                     break;
                 case 1:
                     scanner.nextLine();
                     System.out.println("Введите описание задачи:");
                     String description = scanner.nextLine();
-                    Task taskDescription = (Task) actualTask.get(id);
+                    Task taskDescription = (Task) actualTasks.get(id);
                     taskDescription.setTitle(description);
+                    System.out.println("Задача отредактирована.");
                     break;
             }
         } catch (TaskNotFoundException e) {
@@ -121,14 +123,15 @@ public class TaskService {
 
     public static void deleteTask(Scanner scanner) {
         System.out.println("Актуальные задачи:");
-        printActualTask();
+        printActualTasks();
         try {
             System.out.println("Для удаления введите id задачи");
             int id = scanner.nextInt();
-            if (actualTask.containsKey(id)) {
-                Repeatable removedTask = actualTask.get(id);
+            if (actualTasks.containsKey(id)) {
+                Repeatable removedTask = actualTasks.get(id);
                 removedTask.setArchived(true);
-                archivedTask.put(id, removedTask);
+                archivedTasks.put(id, removedTask);
+                actualTasks.remove(id, removedTask);
                 System.out.println("Задача " + id + " была удалена");
             } else {
                 throw new TaskNotFoundException("Задача не была найдена");
@@ -145,20 +148,23 @@ public class TaskService {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
             LocalDate requestedDate = LocalDate.parse(date, dateFormatter);
             List<Repeatable> foundEvents = findTasksByDay(requestedDate);
-            System.out.println("События на " + requestedDate + " :");
-            for (Repeatable task : foundEvents) {
-                System.out.println(task);
+            if (foundEvents.isEmpty()) {
+                System.out.println("Задач на указанный день нет.");
+            } else {
+                System.out.println("События на " + requestedDate + ":");
+                for (Repeatable task : foundEvents) {
+                    System.out.println(task);
+                }
             }
         } catch (DateTimeParseException e) {
             System.err.println("Проверьте формат даты dd.MM.yyyy и попробуйте еще раз");
         }
         scanner.nextLine();
-        System.out.println("Для выхода нажмите Enter\n");
     }
 
     private static List<Repeatable> findTasksByDay(LocalDate date) {
         List<Repeatable> tasks = new ArrayList<>();
-        for (Repeatable task : actualTask.values()) {
+        for (Repeatable task : actualTasks.values()) {
             if (task.checkOccurrence(date.atStartOfDay())) {
                 tasks.add(task);
             }
@@ -166,32 +172,14 @@ public class TaskService {
         return tasks;
     }
 
-    public static void getGrouppedByDate() {
-        Map<LocalDate, ArrayList<Repeatable>> taskMap = new HashMap<>();
-        for (Map.Entry<Integer, Repeatable> entry : actualTask.entrySet()) {
-            Repeatable task = entry.getValue();
-            LocalDate localDate = task.getFirstDate().toLocalDate();
-            if (taskMap.containsKey(localDate)) {
-                ArrayList<Repeatable> tasks = taskMap.get(localDate);
-                tasks.add(task);
-            } else {
-                taskMap.put(localDate, new ArrayList<>(Collections.singletonList(task)));
-            }
-            for (Map.Entry<LocalDate, ArrayList<Repeatable>> taskEntry : taskMap.entrySet()) {
-                System.out.println(taskEntry.getKey() + " : " + taskEntry.getValue());
-            }
-        }
-    }
-
-
-    public static void printActualTask() {
-        for (Repeatable task : actualTask.values()) {
+    public static void printActualTasks() {
+        for (Repeatable task : actualTasks.values()) {
             System.out.println(task);
         }
     }
 
-    public static void printArchivedTask() {
-        for (Repeatable task : archivedTask.values()) {
+    public static void printArchivedTasks() {
+        for (Repeatable task : archivedTasks.values()) {
             System.out.println(task);
         }
     }
